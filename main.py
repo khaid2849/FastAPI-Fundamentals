@@ -103,14 +103,28 @@ async def create_item_with_put(item_id: int, item: Item, q: str | None = None):
     return result
 
 
-@app.get("/items/")
+@app.get("/items")
 async def read_items(
     q: str
     | None = Query(
-        None, min_length=1, max_length=10, description="dcmm", title="ddjcdsklfjakl"
+        None,
+        min_length=3,
+        max_length=10,
+        title="Sample query string",
+        description="This is a sample query string.",
+        alias="item-query",
     )
 ):
     results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
     if q:
         results.update({"q": q})
     return results
+
+
+@app.get("/items_hidden")
+async def hidden_query_route(
+    hidden_query: str | None = Query(None, include_in_schema=False)
+):
+    if hidden_query:
+        return {"hidden_query": hidden_query}
+    return {"hidden_query": "Not found"}
