@@ -1,4 +1,5 @@
 from fastapi import (
+    Depends,
     FastAPI,
     HTTPException,
     Query,
@@ -601,38 +602,38 @@ Part: Request Forms and Files
 """
 Part: Handling Errors
 """
-items = {"foo": "The Foo Wrestlers"}
+# items = {"foo": "The Foo Wrestlers"}
 
 
-@app.get("/items/{item_id}")
-async def read_item(item_id: str):
-    if item_id not in items:
-        raise HTTPException(
-            status_code=404,
-            detail="Item not found",
-            headers={"X-Error": "There goes my error"},
-        )
-    return {"item": items[item_id]}
+# @app.get("/items/{item_id}")
+# async def read_item(item_id: str):
+#     if item_id not in items:
+#         raise HTTPException(
+#             status_code=404,
+#             detail="Item not found",
+#             headers={"X-Error": "There goes my error"},
+#         )
+#     return {"item": items[item_id]}
 
 
-class UnicornException(Exception):
-    def __init__(self, name: str):
-        self.name = name
+# class UnicornException(Exception):
+#     def __init__(self, name: str):
+#         self.name = name
 
 
-@app.exception_handler(UnicornException)
-async def unicorn_exception_handler(request: Request, exc: UnicornException):
-    return JSONResponse(
-        status_code=418,
-        content={"message": f"Oops! {exc.name} did something. There goes a rainbow..."},
-    )
+# @app.exception_handler(UnicornException)
+# async def unicorn_exception_handler(request: Request, exc: UnicornException):
+#     return JSONResponse(
+#         status_code=418,
+#         content={"message": f"Oops! {exc.name} did something. There goes a rainbow..."},
+#     )
 
 
-@app.get("/unicorns/{name}")
-async def read_unicorns(name: str):
-    if name == "yolo":
-        raise UnicornException(name=name)
-    return {"unicorn_name": name}
+# @app.get("/unicorns/{name}")
+# async def read_unicorns(name: str):
+#     if name == "yolo":
+#         raise UnicornException(name=name)
+#     return {"unicorn_name": name}
 
 
 # @app.exception_handler(RequestValidationError)
@@ -670,18 +671,222 @@ async def read_unicorns(name: str):
 #     return item
 
 
-@app.exception_handler(StarletteHTTPException)
-async def custom_http_exception_handler(request, exc):
-    return await http_exception_handler(request, exc)
+# @app.exception_handler(StarletteHTTPException)
+# async def custom_http_exception_handler(request, exc):
+#     return await http_exception_handler(request, exc)
 
 
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request, exc):
-    return await request_validation_exception_handler(request, exc)
+# @app.exception_handler(RequestValidationError)
+# async def validation_exception_handler(request, exc):
+#     return await request_validation_exception_handler(request, exc)
 
 
-@app.get("/blah_items/{item_id}")
-async def read_items(item_id: int):
-    if item_id == 3:
-        raise HTTPException(status_code=418, detail="Nope! I don't like 3.")
-    return {"item_id": item_id}
+# @app.get("/blah_items/{item_id}")
+# async def read_items(item_id: int):
+#     if item_id == 3:
+#         raise HTTPException(status_code=418, detail="Nope! I don't like 3.")
+#     return {"item_id": item_id}
+
+"""
+Part: Path Operation Configuration
+"""
+
+
+# class Item(BaseModel):
+#     name: str
+#     description: str | None = None
+#     price: float
+#     tax: float | None = None
+#     tags: set[str] = set()
+
+
+# class Tags(Enum):
+#     items = "items"
+#     users = "users"
+
+
+# @app.post(
+#     "/items",
+#     response_model=Item,
+#     status_code=status.HTTP_201_CREATED,
+#     summary="Create an item",
+#     tags=[Tags.items],
+# )
+# async def create_item(item: Item):
+#     return item
+
+
+# @app.get("/items", tags=[Tags.users])
+# async def read_items():
+#     return [{"name": "Foo", "price": 42}]
+
+
+# @app.get("/users")
+# async def read_users():
+#     return [{"username": "johndoe"}]
+
+
+# @app.post(
+#     "/items/",
+#     response_model=Item,
+#     summary="Create an item",
+#     description="Create an item with all the information, name, description, price, tax and a set of unique tags",
+#     tags=[Tags.items],
+# )
+# async def create_item(item: Item):
+#     return item
+
+"""
+Part: JSON Compatible Encoder
+"""
+# fake_db = {}
+
+
+# class Item(BaseModel):
+#     title: str
+#     timestamp: datetime
+#     description: str | None = None
+
+
+# @app.put("/items/{id}")
+# def update_item(id: str, item: Item):
+#     json_compatible_item_data = jsonable_encoder(item)
+#     fake_db[id] = json_compatible_item_data
+#     return fake_db
+
+"""
+Part: Body - Updates
+"""
+
+
+# class Item(BaseModel):
+#     name: str | None = None
+#     description: str | None = None
+#     price: float | None = None
+#     tax: float = 10.5
+#     tags: list[str] = []
+
+
+# items = {
+#     "foo": {"name": "Foo", "price": 50.2},
+#     "bar": {"name": "Bar", "description": "The bartenders", "price": 62, "tax": 20.2},
+#     "barz": {
+#         "name": "Baz",
+#         "description": None,
+#         "price": 50.2,
+#         "tax": 10.5,
+#         "tags": [],
+#     },
+# }
+
+
+# @app.get("/items/{item_id}", response_model=Item)
+# async def read_item(item_id: str):
+#     return items[item_id]
+
+
+# @app.put("/items/{item_id}", response_model=Item)
+# async def update_item(item_id: str, item: Item):
+#     update_item_encoded = jsonable_encoder(item)
+#     items[item_id] = update_item_encoded
+#     return update_item_encoded
+
+
+# Note: PUT is used to receive data that should replace the existing data.
+
+
+# @app.patch("/items/{item_id}", response_model=Item)
+# async def update_item(item_id: str, item: Item):
+#     stored_item_data = items[item_id]
+#     stored_item_model = Item(**stored_item_data)
+#     update_data = item.dict(exclude_unset=True)
+#     updated_item = stored_item_model.copy(update=update_data)
+#     items[item_id] = jsonable_encoder(updated_item)
+#     print(items)
+#     return updated_item
+
+"""
+Part: Dependencies
+"""
+
+
+# async def common_parameters(q: str | None = None, skip: int = 0, limit: int = 100):
+#     return {"q": q, "skip": skip, "limit": limit}
+
+
+# @app.get("/items/")
+# async def read_items(commons: Annotated[dict, Depends(common_parameters)]):
+#     return commons
+
+
+# @app.get("/users/")
+# async def read_users(commons: Annotated[dict, Depends(common_parameters)]):
+#     return commons
+
+# fake_items_db = [{"item_name": "Foo"}, {"item_name": "Bar"}, {"item_name": "Baz"}]
+
+
+# class CommonQueryParams:
+#     def __init__(self, q: str | None = None, skip: int = 0, limit: int = 100):
+#         self.q = q
+#         self.skip = skip
+#         self.limit = limit
+
+
+# @app.get("/items")
+# async def read_items(commons: Annotated[CommonQueryParams, Depends(CommonQueryParams)]):
+#     response = {}
+#     if commons.q:
+#         response.update({"q": commons.q})
+#     items = fake_items_db[commons.skip : commons.skip + commons.limit]
+#     response.update({"items": items})
+#     return response
+
+"""
+Part: Sub - Dependencies
+"""
+
+
+# def query_extractor(q: str | None = None):
+#     return q
+
+
+# def query_or_body_extractor(
+#     q: str = Depends(query_extractor), last_query: str | None = Body(None)
+# ):
+#     if q:
+#         return q
+#     return last_query
+
+
+# @app.post("/item")
+# async def try_query(query_or_body: str = Depends(query_or_body_extractor)):
+#     return {"q_or_body": query_or_body}
+
+"""
+Part: Dependencies in path operation decorators
+"""
+
+
+# async def verify_token(x_token: str = Header(...)):
+#     if x_token != "fake-super-secret-token":
+#         raise HTTPException(status_code=400, detail="X-Token header invalid")
+
+
+# async def verify_key(x_key: str = Header(...)):
+#     if x_key != "fake-super-secret-key":
+#         raise HTTPException(status_code=400, detail="X-key header invalid")
+#     return x_key
+
+
+# app = FastAPI(dependencies=[Depends(verify_token), Depends(verify_key)])
+
+
+# @app.get("/items", dependencies=[Depends(verify_token), Depends(verify_key)])
+# async def read_items():
+#     return [{"item": "Foo"}, {"item": "dcmm"}]
+
+
+# @app.get("/users", dependencies=[Depends(verify_token), Depends(verify_key)])
+# async def read_users():
+#     return [{"username": "Rick"}, {"username": "Morty"}]
