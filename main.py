@@ -890,3 +890,4 @@ Part: Dependencies in path operation decorators
 # @app.get("/users", dependencies=[Depends(verify_token), Depends(verify_key)])
 # async def read_users():
 #     return [{"username": "Rick"}, {"username": "Morty"}]
+
